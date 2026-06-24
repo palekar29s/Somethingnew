@@ -1,0 +1,108 @@
+﻿using Microsoft.IdentityModel.Tokens;
+using Npgsql;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace Somethingnew.Models
+{
+    public class DatabaseClass
+    {
+        private readonly IConfiguration _configuration;
+
+        public DatabaseClass(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public NpgsqlConnection GetConnection()
+        {
+            return new NpgsqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+        }
+        public List<Users> GetUsers()
+        {
+            List<Users> users = new List<Users>();
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = "SELECT * FROM Users";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                users.Add(new Users
+                {
+                    UserId = Convert.ToInt32(reader["UserId"]),
+                    FullName = reader["FullName"].ToString(),
+                    Email = reader["Email"].ToString(),
+                    PasswordHash = reader["PasswordHash"].ToString(),
+                    Role = reader["Role"].ToString(),
+                    IsActive = Convert.ToBoolean(reader["IsActive"]),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                });
+            }
+
+            return users;
+        }
+        // Validate User Login
+        public Users ValidateUser(string email, string password)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = "SELECT * FROM Users WHERE Email=@Email AND PasswordHash=@Password";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@Password", password);
+
+            using var reader = cmd.ExecuteReader();
+
+            if (reader.Read())
+            {
+                return new Users
+                {
+                    UserId = Convert.ToInt32(reader["UserId"]),
+                    FullName = reader["FullName"].ToString(),
+                    Email = reader["Email"].ToString(),
+                    Role = reader["Role"].ToString()
+                };
+            }
+
+            return null;
+        }
+
+        // Generate JWT Token
+        public string GenerateToken(Users user)
+        {
+            var claims = new[]
+            {
+            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+
+            var creds = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddHours(2),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    }
+}
