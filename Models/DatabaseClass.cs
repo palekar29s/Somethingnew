@@ -104,5 +104,28 @@ namespace Somethingnew.Models
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        public bool AddUser(Users user)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"INSERT INTO Users 
+                    (FullName, Email, PasswordHash, Role, IsActive, CreatedAt)
+                    VALUES
+                    (@FullName, @Email, @PasswordHash, @Role, @IsActive, @CreatedAt)";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@FullName", user.FullName);
+            cmd.Parameters.AddWithValue("@Email", user.Email);
+            cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
+            cmd.Parameters.AddWithValue("@Role", user.Role);
+            cmd.Parameters.AddWithValue("@IsActive", user.IsActive);
+            cmd.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            return rows > 0;
+        }
     }
 }

@@ -68,5 +68,23 @@ namespace Somethingnew.Controllers
                 Token = token
             });
         }
+        [HttpPost("register")]
+        public IActionResult AddUser([FromBody] Users user)
+        {
+            var result = _db.AddUser(user);
+
+            if (result)
+            {
+                return Ok(new
+                {
+                    Message = "User added successfully"
+                });
+            }
+
+            return BadRequest(new
+            {
+                Message = "Failed to add user"
+            });
+        }
     }
 }
