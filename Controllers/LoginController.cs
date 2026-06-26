@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Somethingnew.Databases;
 using Somethingnew.Models;
 
 namespace Somethingnew.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HotelController : ControllerBase
+    public class LoginController : ControllerBase
     {
         private readonly DatabaseClass _db;
 
-        public HotelController(DatabaseClass db)
+        public LoginController(DatabaseClass db)
         {
             _db = db;
         }

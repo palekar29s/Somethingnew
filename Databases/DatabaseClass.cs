@@ -1,10 +1,11 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using Somethingnew.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Somethingnew.Models
+namespace Somethingnew.Databases
 {
     public class DatabaseClass
     {
@@ -126,6 +127,34 @@ namespace Somethingnew.Models
             int rows = cmd.ExecuteNonQuery();
 
             return rows > 0;
+        }
+
+
+        //restaurant table deatils 
+        public List<RestaurantTable> GetRestaurantTables()
+        {
+            List<RestaurantTable> tables = new List<RestaurantTable>();
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = "SELECT * FROM RestaurantTables";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                tables.Add(new RestaurantTable
+                {
+                    TableId = Convert.ToInt32(reader["TableId"]),
+                    TableNumber = Convert.ToInt32(reader["TableNumber"]),
+                    Capacity = Convert.ToInt32(reader["Capacity"]),
+                    Status = reader["Status"].ToString()
+                });
+            }
+
+            return tables;
         }
     }
 }
