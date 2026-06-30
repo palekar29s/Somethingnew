@@ -87,5 +87,11 @@ namespace Somethingnew.Controllers
                 Message = "Failed to add user"
             });
         }
+        [HttpDelete("DeleteUser/{userId}")]
+        public IActionResult DeleteUser(int userId)
+        {
+            var result = _db.DeleteUser(userId);
+            return Ok(result);
+        }
     }
 }
