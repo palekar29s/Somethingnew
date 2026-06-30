@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Somethingnew.Databases;
+using Somethingnew.Models;
 
 namespace Somethingnew.Controllers
 {
@@ -19,6 +20,19 @@ namespace Somethingnew.Controllers
         {
             var tables = _db.GetRestaurantTables();
             return Ok(tables);
+        }
+        [HttpPost("AddRestaurantTable")]
+        public IActionResult AddRestaurantTable([FromBody] RestaurantTable table)
+        {
+            var result = _db.AddRestaurantTable(table);
+            return Ok(result);
+        }
+
+        [HttpPut("UpdateTableStatus/{tableId}")]
+        public IActionResult UpdateTableStatus(int tableId, [FromBody] string status)
+        {
+            var result = _db.UpdateTableStatus(tableId, status);
+            return Ok(result);
         }
     }
 

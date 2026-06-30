@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Somethingnew.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -156,5 +157,47 @@ namespace Somethingnew.Databases
 
             return tables;
         }
+        public string AddRestaurantTable(RestaurantTable table)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"INSERT INTO RestaurantTables 
+                     (TableNumber, Capacity, Status) 
+                     VALUES (@TableNumber, @Capacity, @Status)";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@TableNumber", table.TableNumber);
+            cmd.Parameters.AddWithValue("@Capacity", table.Capacity);
+            cmd.Parameters.AddWithValue("@Status", table.Status);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            return rows > 0 ? "Table added successfully" : "Failed to add table";
+        }
+
+
+        public string UpdateTableStatus(int tableId, string status)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"UPDATE RestaurantTables 
+                     SET Status = @Status
+                     WHERE TableId = @TableId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@Status", status);
+            cmd.Parameters.AddWithValue("@TableId", tableId);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            return rows > 0 ? "Table status updated successfully" : "Update failed";
+        }
+
+       
+
     }
 }
