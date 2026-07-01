@@ -34,6 +34,12 @@ namespace Somethingnew.Controllers
             var result = _db.UpdateTableStatus(tableId, status);
             return Ok(result);
         }
+        [HttpDelete("DeleteRestaurantTable/{tableId}")]
+        public IActionResult DeleteRestaurantTable(int tableId)
+        {
+            var result = _db.DeleteRestaurantTable(tableId);
+            return Ok(result);
+        }
     }
 
 }

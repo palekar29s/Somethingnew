@@ -242,5 +242,25 @@ namespace Somethingnew.Databases
             return rows > 0 ? "Table deleted successfully" : "Delete failed";
         }
         //The RestaurantTables related query ends here 
+
+
+        //menu items related query starts here
+        public string DeleteMenuItem(int menuItemId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"DELETE FROM MenuItems 
+                     WHERE MenuItemId = @MenuItemId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@MenuItemId", menuItemId);
+
+            int rows = cmd.ExecuteNonQuery();
+
+            return rows > 0 ? "Menu item deleted successfully" : "Delete failed";
+        }
+        //menu items get information query
     }
 }
