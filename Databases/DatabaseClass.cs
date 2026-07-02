@@ -126,7 +126,7 @@ namespace Somethingnew.Databases
 
             return rows > 0;
         }
-        
+
         //Users Login and Registration related query ends here
 
         // Generate JWT Token query for user authentication
@@ -134,10 +134,10 @@ namespace Somethingnew.Databases
         {
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, user.FullName),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
+        new Claim(ClaimTypes.Name, user.FullName),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role)
+    };
 
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

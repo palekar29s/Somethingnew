@@ -50,7 +50,8 @@ namespace Somethingnew.Controllers
 
             return Ok(new
             {
-                Token = token
+                token = token,
+                role = user.Role
             });
         }
         [HttpPost("register")]
