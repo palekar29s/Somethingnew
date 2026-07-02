@@ -16,22 +16,6 @@ namespace Somethingnew.Controllers
             _db = db;
         }
 
-
-        //[HttpGet]
-        //public ActionResult<List<Hoteldetail>> GetHotels()
-        //{
-        //    return Ok(hotels);
-        //}
-
-
-        //[HttpGet]
-        //public IActionResult GetFoods()
-        //{
-        //    return Ok(foods);
-        //}
-
-
-
         [HttpGet("test")]
         public IActionResult Test()
         {
