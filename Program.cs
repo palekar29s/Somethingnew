@@ -54,6 +54,8 @@ app.UseSwaggerUI();
 
 app.MapGet("/", () => "API Running");
 
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
