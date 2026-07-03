@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Somethingnew.Databases;
 using Somethingnew.Models;
@@ -16,6 +17,7 @@ namespace Somethingnew.Controllers
             _db = db;
         }
 
+
         [HttpGet("test")]
         public IActionResult Test()
         {
@@ -30,12 +32,14 @@ namespace Somethingnew.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetUsers")]
         public IActionResult GetUsers()
         {
             var users = _db.GetUsers();
             return Ok(users);
         }
+       // [Authorize(Roles = "Admin,Waiter,Cashier")]
         [HttpPost("login")]
         public IActionResult Login(LoginDto model)
         {
@@ -54,6 +58,7 @@ namespace Somethingnew.Controllers
                 role = user.Role
             });
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public IActionResult AddUser([FromBody] Users user)
         {
@@ -72,6 +77,7 @@ namespace Somethingnew.Controllers
                 Message = "Failed to add user"
             });
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteUser/{userId}")]
         public IActionResult DeleteUser(int userId)
         {

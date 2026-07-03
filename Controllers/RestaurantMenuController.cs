@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Somethingnew.Databases;
 using Somethingnew.Models;
@@ -18,12 +19,16 @@ namespace Somethingnew.Controllers
         }
 
         //Api related to restaurant tables
+
+        [Authorize(Roles = "Admin,Waiter,Cashier")]
         [HttpGet("GetRestaurantTables")]
         public IActionResult GetRestaurantTables()
         {
             var tables = _db.GetRestaurantTables();
             return Ok(tables);
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost("AddRestaurantTable")]
         public IActionResult AddRestaurantTable([FromBody] RestaurantTable table)
         {
@@ -31,14 +36,15 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("UpdateTableStatus/{tableId}")]
         public IActionResult UpdateTableStatus(int tableId, [FromBody] string status)
         {
             var result = _db.UpdateTableStatus(tableId, status);
             return Ok(result);
         }
-        
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteRestaurantTable/{tableId}")]
         public IActionResult DeleteRestaurantTable(int tableId)
         {
@@ -49,24 +55,30 @@ namespace Somethingnew.Controllers
 
 
         //Api related to menu items
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpGet("GetMenuItems")]
         public IActionResult GetMenuItems()
         {
             var menuItems = _db.GetMenuItems();
             return Ok(menuItems);
         }
+
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpPost("AddMenuItem")]
         public IActionResult AddMenuItem([FromBody] MenuItem item)
         {
             var result = _db.AddMenuItem(item);
             return Ok(result);
         }
+
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpPut("UpdateMenuItem")]
         public IActionResult UpdateMenuItem([FromBody] MenuItem item)
         {
             var result = _db.UpdateMenuItem(item);
             return Ok(result);
         }
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpDelete("DeleteMenuItem/{menuItemId}")]
         public IActionResult DeleteMenuItem(int menuItemId)
         {

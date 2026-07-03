@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Somethingnew.Databases;
 using Somethingnew.Models;
@@ -17,26 +18,31 @@ namespace Somethingnew.Controllers
             _db = db;
         }
 
+
         //order related APIs
+
+        [Authorize(Roles = "Waiter")]
         [HttpPost("AddOrder")]
         public IActionResult AddOrder([FromBody] Order order)
         {
             var result = _db.AddOrder(order);
             return Ok(result);
         }
+        [Authorize(Roles = "Waiter")]
         [HttpDelete("DeleteOrder/{orderId}")]
         public IActionResult DeleteOrder(int orderId)
         {
             var result = _db.DeleteOrder(orderId);
             return Ok(result);
         }
+        [Authorize(Roles = "Waiter,Chef")]
         [HttpPut("UpdateOrder")]
         public IActionResult UpdateOrder([FromBody] Order order)
         {
             var result = _db.UpdateOrder(order);
             return Ok(result);
         }
-
+        [Authorize(Roles = "Waiter,Cashier")]
         [HttpGet("GetOrdersByWaiter/{waiterId}")]
         public IActionResult GetOrdersByWaiter(int waiterId)
         {
@@ -47,12 +53,15 @@ namespace Somethingnew.Controllers
         //order related APIs ends
 
         //payment related APIs
+        [Authorize(Roles = "Waiter,Cashier")]
         [HttpGet("GetPaymentsByWaiter/{waiterId}")]
         public IActionResult GetPaymentsByWaiter(int waiterId)
         {
             var payments = _db.GetPaymentsByWaiterId(waiterId);
             return Ok(payments);
         }
+
+        [Authorize(Roles = "Waiter,Cashier")]
         [HttpGet("GetPaymentById/{waiterId}/{paymentId}")]
         public IActionResult GetPaymentById(int waiterId, int paymentId)
         {
@@ -64,6 +73,7 @@ namespace Somethingnew.Controllers
             return Ok(payment);
         }
 
+        [Authorize(Roles = "Waiter,Cashier")]
         [HttpPost("AddPayment")]
         public IActionResult AddPayment([FromBody] Payment payment)
         {
@@ -71,6 +81,7 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Waiter,Cashier")]
         [HttpPut("UpdatePayment")]
         public IActionResult UpdatePayment([FromBody] Payment payment)
         {
@@ -78,6 +89,7 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Waiter,Cashier")]
         [HttpDelete("DeletePayment/{paymentId}")]
         public IActionResult DeletePayment(int paymentId)
         {
@@ -90,6 +102,7 @@ namespace Somethingnew.Controllers
         //payment related APIs ends
 
         //categories API start
+        [Authorize(Roles = "Waiter,Admin")]
         [HttpGet("GetCategories")]
         public IActionResult GetCategories()
         {
@@ -97,19 +110,22 @@ namespace Somethingnew.Controllers
             return Ok(categories);
         }
 
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpPost("AddCategory")]
         public IActionResult AddCategory([FromBody] Category category)
         {
             var result = _db.AddCategory(category);
             return Ok(result);
         }
+
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpPut("UpdateCategory")]
         public IActionResult UpdateCategory([FromBody] Category category)
         {
             var result = _db.UpdateCategory(category);
             return Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteCategory/{categoryId}")]
         public IActionResult DeleteCategory(int categoryId)
         {
