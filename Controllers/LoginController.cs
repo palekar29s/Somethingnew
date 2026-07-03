@@ -55,7 +55,7 @@ namespace Somethingnew.Controllers
             return Ok(new
             {
                 token = token,
-                role = user.Role
+                role = user.Role.Substring(0, 1).ToUpper() + user.Role.Substring(1).ToLower()
             });
         }
         [Authorize(Roles = "Admin")]
