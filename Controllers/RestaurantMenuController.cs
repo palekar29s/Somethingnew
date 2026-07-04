@@ -28,7 +28,7 @@ namespace Somethingnew.Controllers
             return Ok(tables);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpPost("AddRestaurantTable")]
         public IActionResult AddRestaurantTable([FromBody] RestaurantTable table)
         {
