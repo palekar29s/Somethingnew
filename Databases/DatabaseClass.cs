@@ -169,7 +169,7 @@ namespace Somethingnew.Databases
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM RestaurantTables";
+            string query = "SELECT * FROM RestaurantTables ORDER BY TableNumber";
 
             using var cmd = new NpgsqlCommand(query, conn);
             using var reader = cmd.ExecuteReader();
@@ -181,7 +181,8 @@ namespace Somethingnew.Databases
                     TableId = Convert.ToInt32(reader["TableId"]),
                     TableNumber = Convert.ToInt32(reader["TableNumber"]),
                     Capacity = Convert.ToInt32(reader["Capacity"]),
-                    Status = reader["Status"].ToString()
+                    Status = reader["Status"].ToString(),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
                 });
             }
 
@@ -192,9 +193,10 @@ namespace Somethingnew.Databases
             using var conn = GetConnection();
             conn.Open();
 
-            string query = @"INSERT INTO RestaurantTables 
-                     (TableNumber, Capacity, Status) 
-                     VALUES (@TableNumber, @Capacity, @Status)";
+            string query = @"INSERT INTO RestaurantTables
+                    (TableNumber, Capacity, Status)
+                    VALUES
+                    (@TableNumber, @Capacity, @Status)";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
@@ -202,47 +204,67 @@ namespace Somethingnew.Databases
             cmd.Parameters.AddWithValue("@Capacity", table.Capacity);
             cmd.Parameters.AddWithValue("@Status", table.Status);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Table added successfully" : "Failed to add table";
+            return "Restaurant Table Added Successfully";
         }
+        public string UpdateRestaurantTable(RestaurantTable table)
+        {
+            using var conn = GetConnection();
+            conn.Open();
 
+            string query = @"UPDATE RestaurantTables
+                     SET
+                        TableNumber=@TableNumber,
+                        Capacity=@Capacity,
+                        Status=@Status
+                     WHERE TableId=@TableId";
 
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@TableId", table.TableId);
+            cmd.Parameters.AddWithValue("@TableNumber", table.TableNumber);
+            cmd.Parameters.AddWithValue("@Capacity", table.Capacity);
+            cmd.Parameters.AddWithValue("@Status", table.Status);
+
+            cmd.ExecuteNonQuery();
+
+            return "Restaurant Table Updated Successfully";
+        }
+        public string DeleteRestaurantTable(int tableId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = "DELETE FROM RestaurantTables WHERE TableId=@TableId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@TableId", tableId);
+
+            cmd.ExecuteNonQuery();
+
+            return "Restaurant Table Deleted Successfully";
+        }
         public string UpdateTableStatus(int tableId, string status)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = @"UPDATE RestaurantTables 
-                     SET Status = @Status
-                     WHERE TableId = @TableId";
+            string query = @"UPDATE RestaurantTables
+                     SET Status=@Status
+                     WHERE TableId=@TableId";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
             cmd.Parameters.AddWithValue("@Status", status);
             cmd.Parameters.AddWithValue("@TableId", tableId);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Table status updated successfully" : "Update failed";
+            return "Table Status Updated Successfully";
         }
 
-        public string DeleteRestaurantTable(int tableId)
-        {
-            using var conn = GetConnection();
-            conn.Open();
-
-            string query = @"DELETE FROM RestaurantTables 
-                     WHERE TableId = @TableId";
-
-            using var cmd = new NpgsqlCommand(query, conn);
-
-            cmd.Parameters.AddWithValue("@TableId", tableId);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            return rows > 0 ? "Table deleted successfully" : "Delete failed";
-        }
         //The RestaurantTables related query ends here 
 
 
@@ -250,29 +272,34 @@ namespace Somethingnew.Databases
 
         public List<MenuItem> GetMenuItems()
         {
-            List<MenuItem> menuItems = new List<MenuItem>();
+            List<MenuItem> items = new List<MenuItem>();
 
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM MenuItems";
+            string query = @"SELECT *
+                     FROM MenuItems
+                     ORDER BY ItemName";
 
             using var cmd = new NpgsqlCommand(query, conn);
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                menuItems.Add(new MenuItem
+                items.Add(new MenuItem
                 {
                     MenuItemId = Convert.ToInt32(reader["MenuItemId"]),
                     CategoryId = Convert.ToInt32(reader["CategoryId"]),
                     ItemName = reader["ItemName"].ToString(),
+                    Description = reader["Description"].ToString(),
                     Price = Convert.ToDecimal(reader["Price"]),
-                    IsAvailable = Convert.ToBoolean(reader["IsAvailable"])
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    IsAvailable = Convert.ToBoolean(reader["IsAvailable"]),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
                 });
             }
 
-            return menuItems;
+            return items;
         }
         public string AddMenuItem(MenuItem item)
         {
@@ -280,135 +307,247 @@ namespace Somethingnew.Databases
             conn.Open();
 
             string query = @"INSERT INTO MenuItems
-                    (CategoryId, ItemName, Price, IsAvailable)
+                    (CategoryId,ItemName,Description,Price,ImageUrl)
+
                     VALUES
-                    (@CategoryId, @ItemName, @Price, @IsAvailable)";
+
+                    (@CategoryId,@ItemName,@Description,@Price,@ImageUrl)";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
             cmd.Parameters.AddWithValue("@CategoryId", item.CategoryId);
             cmd.Parameters.AddWithValue("@ItemName", item.ItemName);
+            cmd.Parameters.AddWithValue("@Description", item.Description);
             cmd.Parameters.AddWithValue("@Price", item.Price);
-            cmd.Parameters.AddWithValue("@IsAvailable", item.IsAvailable);
+            cmd.Parameters.AddWithValue("@ImageUrl", (object?)item.ImageUrl ?? DBNull.Value);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Menu item added successfully" : "Failed to add menu item";
+            return "Menu Item Added Successfully";
         }
-
         public string UpdateMenuItem(MenuItem item)
         {
             using var conn = GetConnection();
             conn.Open();
 
             string query = @"UPDATE MenuItems
-                     SET CategoryId = @CategoryId,
-                         ItemName = @ItemName,
-                         Price = @Price,
-                         IsAvailable = @IsAvailable
-                     WHERE MenuItemId = @MenuItemId";
+
+                     SET
+
+                     CategoryId=@CategoryId,
+
+                     ItemName=@ItemName,
+
+                     Description=@Description,
+
+                     Price=@Price,
+
+                     ImageUrl=@ImageUrl,
+
+                     IsAvailable=@IsAvailable
+
+                     WHERE MenuItemId=@MenuItemId";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
             cmd.Parameters.AddWithValue("@MenuItemId", item.MenuItemId);
             cmd.Parameters.AddWithValue("@CategoryId", item.CategoryId);
             cmd.Parameters.AddWithValue("@ItemName", item.ItemName);
+            cmd.Parameters.AddWithValue("@Description", item.Description);
             cmd.Parameters.AddWithValue("@Price", item.Price);
+            cmd.Parameters.AddWithValue("@ImageUrl", (object?)item.ImageUrl ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@IsAvailable", item.IsAvailable);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Menu item updated successfully" : "Update failed";
+            return "Menu Item Updated Successfully";
         }
-
         public string DeleteMenuItem(int menuItemId)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = @"DELETE FROM MenuItems 
-                     WHERE MenuItemId = @MenuItemId";
+            string query = "DELETE FROM MenuItems WHERE MenuItemId=@MenuItemId";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
             cmd.Parameters.AddWithValue("@MenuItemId", menuItemId);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Menu item deleted successfully" : "Delete failed";
+            return "Menu Item Deleted Successfully";
         }
+        public string UpdateMenuAvailability(int menuItemId, bool isAvailable)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"UPDATE MenuItems
+                     SET IsAvailable=@IsAvailable
+                     WHERE MenuItemId=@MenuItemId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@MenuItemId", menuItemId);
+            cmd.Parameters.AddWithValue("@IsAvailable", isAvailable);
+
+            cmd.ExecuteNonQuery();
+
+            return "Menu Availability Updated Successfully";
+        }
+
         //menu items get information query
 
         //order related query starts here
-        public string AddOrder(Order order)
+
+        public string CreateOrder(CreateOrderRequest request)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = @"INSERT INTO Orders
-                    (TableId, WaiterId, OrderStatus, CreatedAt)
-                    VALUES
-                    (@TableId, @WaiterId, @OrderStatus, @CreatedAt)";
+            using var transaction = conn.BeginTransaction();
 
-            using var cmd = new NpgsqlCommand(query, conn);
+            try
+            {
+                decimal totalAmount = 0;
 
-            cmd.Parameters.AddWithValue("@TableId", order.TableId);
-            cmd.Parameters.AddWithValue("@WaiterId", order.WaiterId);
-            cmd.Parameters.AddWithValue("@OrderStatus", order.OrderStatus);
-            cmd.Parameters.AddWithValue("@CreatedAt", order.CreatedAt);
+                // Create Order
+                string orderQuery = @"
+            INSERT INTO Orders
+            (TableId, WaiterId, OrderStatus, TotalAmount)
+            VALUES
+            (@TableId, @WaiterId, 'Pending', 0)
+            RETURNING OrderId";
 
-            int rows = cmd.ExecuteNonQuery();
+                int orderId;
 
-            return rows > 0 ? "Order added successfully" : "Failed to add order";
+                using (var cmd = new NpgsqlCommand(orderQuery, conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@TableId", request.TableId);
+                    cmd.Parameters.AddWithValue("@WaiterId", request.WaiterId);
+
+                    orderId = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+
+                // Insert Order Items
+                foreach (var item in request.Items)
+                {
+                    decimal price = 0;
+
+                    string priceQuery = @"
+                SELECT Price
+                FROM MenuItems
+                WHERE MenuItemId=@MenuItemId";
+
+                    using (var cmd = new NpgsqlCommand(priceQuery, conn, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@MenuItemId", item.MenuItemId);
+
+                        price = Convert.ToDecimal(cmd.ExecuteScalar());
+                    }
+
+                    string itemQuery = @"
+                INSERT INTO OrderItems
+                (OrderId, MenuItemId, Quantity, Price)
+
+                VALUES
+
+                (@OrderId,@MenuItemId,@Quantity,@Price)";
+
+                    using (var cmd = new NpgsqlCommand(itemQuery, conn, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@OrderId", orderId);
+                        cmd.Parameters.AddWithValue("@MenuItemId", item.MenuItemId);
+                        cmd.Parameters.AddWithValue("@Quantity", item.Quantity);
+                        cmd.Parameters.AddWithValue("@Price", price);
+
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    totalAmount += price * item.Quantity;
+                }
+
+                // Update Total Amount
+                string updateQuery = @"
+            UPDATE Orders
+            SET TotalAmount=@TotalAmount
+            WHERE OrderId=@OrderId";
+
+                using (var cmd = new NpgsqlCommand(updateQuery, conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@OrderId", orderId);
+                    cmd.Parameters.AddWithValue("@TotalAmount", totalAmount);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Update Table Status
+                string tableQuery = @"
+            UPDATE RestaurantTables
+            SET Status='Occupied'
+            WHERE TableId=@TableId";
+
+                using (var cmd = new NpgsqlCommand(tableQuery, conn, transaction))
+                {
+                    cmd.Parameters.AddWithValue("@TableId", request.TableId);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+
+                return "Order Created Successfully";
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return ex.Message;
+            }
         }
-        public string UpdateOrder(Order order)
-        {
-            using var conn = GetConnection();
-            conn.Open();
 
-            string query = @"UPDATE Orders
-                     SET TableId = @TableId,
-                         WaiterId = @WaiterId,
-                         OrderStatus = @OrderStatus
-                     WHERE OrderId = @OrderId";
-
-            using var cmd = new NpgsqlCommand(query, conn);
-
-            cmd.Parameters.AddWithValue("@OrderId", order.OrderId);
-            cmd.Parameters.AddWithValue("@TableId", order.TableId);
-            cmd.Parameters.AddWithValue("@WaiterId", order.WaiterId);
-            cmd.Parameters.AddWithValue("@OrderStatus", order.OrderStatus);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            return rows > 0 ? "Order updated successfully" : "Update failed";
-        }
-
-        public string DeleteOrder(int orderId)
-        {
-            using var conn = GetConnection();
-            conn.Open();
-
-            string query = "DELETE FROM Orders WHERE OrderId = @OrderId";
-
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@OrderId", orderId);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            return rows > 0 ? "Order deleted successfully" : "Delete failed";
-        }
-
-        public List<Order> GetOrdersByWaiterId(int waiterId)
+        public List<Order> GetOrders()
         {
             List<Order> orders = new List<Order>();
 
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM Orders WHERE WaiterId = @WaiterId";
+            string query = @"SELECT *
+                     FROM Orders
+                     ORDER BY CreatedAt DESC";
 
             using var cmd = new NpgsqlCommand(query, conn);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                orders.Add(new Order
+                {
+                    OrderId = Convert.ToInt32(reader["OrderId"]),
+                    TableId = Convert.ToInt32(reader["TableId"]),
+                    WaiterId = Convert.ToInt32(reader["WaiterId"]),
+                    OrderStatus = reader["OrderStatus"].ToString(),
+                    TotalAmount = Convert.ToDecimal(reader["TotalAmount"]),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                });
+            }
+
+            return orders;
+        }
+        public List<Order> GetOrdersByWaiter(int waiterId)
+        {
+            List<Order> orders = new List<Order>();
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"SELECT *
+                     FROM Orders
+                     WHERE WaiterId=@WaiterId
+                     ORDER BY CreatedAt DESC";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
             cmd.Parameters.AddWithValue("@WaiterId", waiterId);
 
             using var reader = cmd.ExecuteReader();
@@ -421,29 +560,132 @@ namespace Somethingnew.Databases
                     TableId = Convert.ToInt32(reader["TableId"]),
                     WaiterId = Convert.ToInt32(reader["WaiterId"]),
                     OrderStatus = reader["OrderStatus"].ToString(),
+                    TotalAmount = Convert.ToDecimal(reader["TotalAmount"]),
                     CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
                 });
             }
 
             return orders;
         }
-        //order related query ends here
+        public List<OrderItem> GetOrderItems()
+        {
+            List<OrderItem> items = new List<OrderItem>();
 
-        //category related query starts here
-        public string AddCategory(Category category)
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"SELECT *
+                     FROM OrderItems
+                     ORDER BY OrderId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                items.Add(new OrderItem
+                {
+                    OrderItemId = Convert.ToInt32(reader["OrderItemId"]),
+                    OrderId = Convert.ToInt32(reader["OrderId"]),
+                    MenuItemId = Convert.ToInt32(reader["MenuItemId"]),
+                    Quantity = Convert.ToInt32(reader["Quantity"]),
+                    Price = Convert.ToDecimal(reader["Price"]),
+                    ItemStatus = reader["ItemStatus"].ToString()
+                });
+            }
+
+            return items;
+        }
+        public List<OrderItem> GetOrderItemsByOrder(int orderId)
+        {
+            List<OrderItem> items = new List<OrderItem>();
+
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"SELECT *
+                     FROM OrderItems
+                     WHERE OrderId=@OrderId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@OrderId", orderId);
+
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                items.Add(new OrderItem
+                {
+                    OrderItemId = Convert.ToInt32(reader["OrderItemId"]),
+                    OrderId = Convert.ToInt32(reader["OrderId"]),
+                    MenuItemId = Convert.ToInt32(reader["MenuItemId"]),
+                    Quantity = Convert.ToInt32(reader["Quantity"]),
+                    Price = Convert.ToDecimal(reader["Price"]),
+                    ItemStatus = reader["ItemStatus"].ToString()
+                });
+            }
+
+            return items;
+        }
+        public string UpdateOrderStatus(int orderId, string status)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "INSERT INTO Categories (CategoryName) VALUES (@CategoryName)";
+            string query = @"UPDATE Orders
+                     SET OrderStatus=@OrderStatus
+                     WHERE OrderId=@OrderId";
 
             using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@CategoryName", category.CategoryName);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.Parameters.AddWithValue("@OrderId", orderId);
+            cmd.Parameters.AddWithValue("@OrderStatus", status);
 
-            return rows > 0 ? "Category added successfully" : "Failed to add category";
+            cmd.ExecuteNonQuery();
+
+            return "Order Status Updated Successfully";
         }
+        public string UpdateOrderItemStatus(int orderItemId, string status)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"UPDATE OrderItems
+                     SET ItemStatus=@ItemStatus
+                     WHERE OrderItemId=@OrderItemId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@OrderItemId", orderItemId);
+            cmd.Parameters.AddWithValue("@ItemStatus", status);
+
+            cmd.ExecuteNonQuery();
+
+            return "Order Item Status Updated Successfully";
+        }
+        public string DeleteOrder(int orderId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"DELETE FROM Orders
+                     WHERE OrderId=@OrderId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@OrderId", orderId);
+
+            cmd.ExecuteNonQuery();
+
+            return "Order Deleted Successfully";
+        }
+
+        //order related query ends here
+
+        //category related query starts here
+
         public List<Category> GetCategories()
         {
             List<Category> categories = new List<Category>();
@@ -451,7 +693,7 @@ namespace Somethingnew.Databases
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM Categories";
+            string query = "SELECT * FROM Categories ORDER BY CategoryName";
 
             using var cmd = new NpgsqlCommand(query, conn);
             using var reader = cmd.ExecuteReader();
@@ -461,11 +703,31 @@ namespace Somethingnew.Databases
                 categories.Add(new Category
                 {
                     CategoryId = Convert.ToInt32(reader["CategoryId"]),
-                    CategoryName = reader["CategoryName"].ToString()
+                    CategoryName = reader["CategoryName"].ToString(),
+                    IsActive = Convert.ToBoolean(reader["IsActive"]),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
                 });
             }
 
             return categories;
+        }
+        public string AddCategory(Category category)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"INSERT INTO Categories
+                    (CategoryName)
+                    VALUES
+                    (@CategoryName)";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@CategoryName", category.CategoryName);
+
+            cmd.ExecuteNonQuery();
+
+            return "Category Added Successfully";
         }
 
         public string UpdateCategory(Category category)
@@ -474,46 +736,72 @@ namespace Somethingnew.Databases
             conn.Open();
 
             string query = @"UPDATE Categories
-                     SET CategoryName = @CategoryName
-                     WHERE CategoryId = @CategoryId";
+                     SET
+                        CategoryName=@CategoryName,
+                        IsActive=@IsActive
+                     WHERE CategoryId=@CategoryId";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
             cmd.Parameters.AddWithValue("@CategoryId", category.CategoryId);
             cmd.Parameters.AddWithValue("@CategoryName", category.CategoryName);
+            cmd.Parameters.AddWithValue("@IsActive", category.IsActive);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Category updated successfully" : "Update failed";
+            return "Category Updated Successfully";
         }
+
         public string DeleteCategory(int categoryId)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "DELETE FROM Categories WHERE CategoryId = @CategoryId";
+            string query = "DELETE FROM Categories WHERE CategoryId=@CategoryId";
 
             using var cmd = new NpgsqlCommand(query, conn);
+
             cmd.Parameters.AddWithValue("@CategoryId", categoryId);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Category deleted successfully" : "Delete failed";
+            return "Category Deleted Successfully";
         }
+        public string UpdateCategoryStatus(int categoryId, bool isActive)
+        {
+            using var conn = GetConnection();
+            conn.Open();
 
+            string query = @"UPDATE Categories
+                     SET IsActive=@IsActive
+                     WHERE CategoryId=@CategoryId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+            cmd.Parameters.AddWithValue("@IsActive", isActive);
+
+            cmd.ExecuteNonQuery();
+
+            return "Category Status Updated Successfully";
+        }
         //category related query ends here
 
 
         //payment related query starts here
+
+
         public string AddPayment(Payment payment)
         {
             using var conn = GetConnection();
             conn.Open();
 
             string query = @"INSERT INTO Payments
-                    (OrderId, Amount, PaymentMethod, PaymentStatus, PaidAt)
+                    (OrderId,Amount,PaymentMethod,PaymentStatus,PaidAt)
+
                     VALUES
-                    (@OrderId, @Amount, @PaymentMethod, @PaymentStatus, @PaidAt)";
+
+                    (@OrderId,@Amount,@PaymentMethod,@PaymentStatus,@PaidAt)";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
@@ -521,11 +809,12 @@ namespace Somethingnew.Databases
             cmd.Parameters.AddWithValue("@Amount", payment.Amount);
             cmd.Parameters.AddWithValue("@PaymentMethod", payment.PaymentMethod);
             cmd.Parameters.AddWithValue("@PaymentStatus", payment.PaymentStatus);
-            cmd.Parameters.AddWithValue("@PaidAt", payment.PaidAt ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@PaidAt",
+                payment.PaidAt.HasValue ? payment.PaidAt.Value : DBNull.Value);
 
-            int rows = cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
 
-            return rows > 0 ? "Payment added successfully" : "Failed to add payment";
+            return "Payment Added Successfully";
         }
         public List<Payment> GetPayments()
         {
@@ -534,80 +823,11 @@ namespace Somethingnew.Databases
             using var conn = GetConnection();
             conn.Open();
 
-            string query = "SELECT * FROM Payments";
+            string query = @"SELECT *
+                     FROM Payments
+                     ORDER BY PaymentId DESC";
 
             using var cmd = new NpgsqlCommand(query, conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                payments.Add(new Payment
-                {
-                    PaymentId = Convert.ToInt32(reader["PaymentId"]),
-                    OrderId = Convert.ToInt32(reader["OrderId"]),
-                    Amount = Convert.ToDecimal(reader["Amount"]),
-                    PaymentMethod = reader["PaymentMethod"].ToString(),
-                    PaymentStatus = reader["PaymentStatus"].ToString(),
-                    PaidAt = reader["PaidAt"] == DBNull.Value ? null : Convert.ToDateTime(reader["PaidAt"])
-                });
-            }
-
-            return payments;
-        }
-        public string UpdatePayment(Payment payment)
-        {
-            using var conn = GetConnection();
-            conn.Open();
-
-            string query = @"UPDATE Payments
-                     SET Amount = @Amount,
-                         PaymentMethod = @PaymentMethod,
-                         PaymentStatus = @PaymentStatus,
-                         PaidAt = @PaidAt
-                     WHERE PaymentId = @PaymentId";
-
-            using var cmd = new NpgsqlCommand(query, conn);
-
-            cmd.Parameters.AddWithValue("@PaymentId", payment.PaymentId);
-            cmd.Parameters.AddWithValue("@Amount", payment.Amount);
-            cmd.Parameters.AddWithValue("@PaymentMethod", payment.PaymentMethod);
-            cmd.Parameters.AddWithValue("@PaymentStatus", payment.PaymentStatus);
-            cmd.Parameters.AddWithValue("@PaidAt", payment.PaidAt ?? (object)DBNull.Value);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            return rows > 0 ? "Payment updated successfully" : "Update failed";
-        }
-        public string DeletePayment(int paymentId)
-        {
-            using var conn = GetConnection();
-            conn.Open();
-
-            string query = "DELETE FROM Payments WHERE PaymentId = @PaymentId";
-
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@PaymentId", paymentId);
-
-            int rows = cmd.ExecuteNonQuery();
-
-            return rows > 0 ? "Payment deleted successfully" : "Delete failed";
-        }
-
-        public List<Payment> GetPaymentsByWaiterId(int waiterId)
-        {
-            List<Payment> payments = new List<Payment>();
-
-            using var conn = GetConnection();
-            conn.Open();
-
-            string query = @"
-        SELECT p.*
-        FROM Payments p
-        INNER JOIN Orders o ON p.OrderId = o.OrderId
-        WHERE o.WaiterId = @WaiterId";
-
-            using var cmd = new NpgsqlCommand(query, conn);
-            cmd.Parameters.AddWithValue("@WaiterId", waiterId);
 
             using var reader = cmd.ExecuteReader();
 
@@ -621,30 +841,25 @@ namespace Somethingnew.Databases
                     PaymentMethod = reader["PaymentMethod"].ToString(),
                     PaymentStatus = reader["PaymentStatus"].ToString(),
                     PaidAt = reader["PaidAt"] == DBNull.Value
-                                ? null
-                                : Convert.ToDateTime(reader["PaidAt"])
+                        ? null
+                        : Convert.ToDateTime(reader["PaidAt"])
                 });
             }
 
             return payments;
         }
-
-        public Payment GetPaymentById(int waiterId, int paymentId)
+        public Payment? GetPaymentByOrder(int orderId)
         {
             using var conn = GetConnection();
             conn.Open();
 
-            string query = @"
-        SELECT p.*
-        FROM Payments p
-        INNER JOIN Orders o ON p.OrderId = o.OrderId
-        WHERE o.WaiterId = @WaiterId
-        AND p.PaymentId = @PaymentId";
+            string query = @"SELECT *
+                     FROM Payments
+                     WHERE OrderId=@OrderId";
 
             using var cmd = new NpgsqlCommand(query, conn);
 
-            cmd.Parameters.AddWithValue("@WaiterId", waiterId);
-            cmd.Parameters.AddWithValue("@PaymentId", paymentId);
+            cmd.Parameters.AddWithValue("@OrderId", orderId);
 
             using var reader = cmd.ExecuteReader();
 
@@ -658,13 +873,62 @@ namespace Somethingnew.Databases
                     PaymentMethod = reader["PaymentMethod"].ToString(),
                     PaymentStatus = reader["PaymentStatus"].ToString(),
                     PaidAt = reader["PaidAt"] == DBNull.Value
-                                ? null
-                                : Convert.ToDateTime(reader["PaidAt"])
+                        ? null
+                        : Convert.ToDateTime(reader["PaidAt"])
                 };
             }
 
             return null;
         }
+        public string UpdatePayment(Payment payment)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"UPDATE Payments
+
+                     SET
+
+                     Amount=@Amount,
+
+                     PaymentMethod=@PaymentMethod,
+
+                     PaymentStatus=@PaymentStatus,
+
+                     PaidAt=@PaidAt
+
+                     WHERE PaymentId=@PaymentId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@PaymentId", payment.PaymentId);
+            cmd.Parameters.AddWithValue("@Amount", payment.Amount);
+            cmd.Parameters.AddWithValue("@PaymentMethod", payment.PaymentMethod);
+            cmd.Parameters.AddWithValue("@PaymentStatus", payment.PaymentStatus);
+            cmd.Parameters.AddWithValue("@PaidAt",
+                payment.PaidAt.HasValue ? payment.PaidAt.Value : DBNull.Value);
+
+            cmd.ExecuteNonQuery();
+
+            return "Payment Updated Successfully";
+        }
+        public string DeletePayment(int paymentId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
+
+            string query = @"DELETE FROM Payments
+                     WHERE PaymentId=@PaymentId";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@PaymentId", paymentId);
+
+            cmd.ExecuteNonQuery();
+
+            return "Payment Deleted Successfully";
+        }
+
         //payment related query ends here
     }
 }

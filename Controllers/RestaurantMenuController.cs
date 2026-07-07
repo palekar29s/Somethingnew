@@ -19,6 +19,9 @@ namespace Somethingnew.Controllers
         }
 
         //Api related to restaurant tables
+        // =============================
+        // Restaurant Tables APIs
+        // =============================
 
         [Authorize(Roles = "Admin,Waiter,Cashier")]
         [HttpGet("GetRestaurantTables")]
@@ -28,11 +31,19 @@ namespace Somethingnew.Controllers
             return Ok(tables);
         }
 
-        [Authorize(Roles = "Admin,Waiter")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("AddRestaurantTable")]
         public IActionResult AddRestaurantTable([FromBody] RestaurantTable table)
         {
             var result = _db.AddRestaurantTable(table);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("UpdateRestaurantTable")]
+        public IActionResult UpdateRestaurantTable([FromBody] RestaurantTable table)
+        {
+            var result = _db.UpdateRestaurantTable(table);
             return Ok(result);
         }
 
@@ -55,40 +66,47 @@ namespace Somethingnew.Controllers
 
 
         //Api related to menu items
+        // =============================
+        // Menu Items APIs
+        // =============================
+
         [Authorize(Roles = "Admin,Waiter")]
         [HttpGet("GetMenuItems")]
         public IActionResult GetMenuItems()
         {
-            var menuItems = _db.GetMenuItems();
-            return Ok(menuItems);
+            return Ok(_db.GetMenuItems());
         }
 
-        [Authorize(Roles = "Admin,Waiter")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("AddMenuItem")]
         public IActionResult AddMenuItem([FromBody] MenuItem item)
         {
-            var result = _db.AddMenuItem(item);
-            return Ok(result);
+            return Ok(_db.AddMenuItem(item));
         }
 
-        [Authorize(Roles = "Admin,Waiter")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("UpdateMenuItem")]
         public IActionResult UpdateMenuItem([FromBody] MenuItem item)
         {
-            var result = _db.UpdateMenuItem(item);
-            return Ok(result);
+            return Ok(_db.UpdateMenuItem(item));
         }
-        [Authorize(Roles = "Admin,Waiter")]
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("UpdateMenuAvailability/{menuItemId}")]
+        public IActionResult UpdateMenuAvailability(int menuItemId, [FromBody] bool isAvailable)
+        {
+            return Ok(_db.UpdateMenuAvailability(menuItemId, isAvailable));
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteMenuItem/{menuItemId}")]
         public IActionResult DeleteMenuItem(int menuItemId)
         {
-            var result = _db.DeleteMenuItem(menuItemId);
-            return Ok(result);
+            return Ok(_db.DeleteMenuItem(menuItemId));
         }
-
         //Api related to menu items ends
 
-        
+
     }
 
 }

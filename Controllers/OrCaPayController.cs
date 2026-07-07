@@ -20,89 +20,118 @@ namespace Somethingnew.Controllers
 
 
         //order related APIs
+        // ============================
+        // Orders APIs
+        // ============================
 
-        [Authorize(Roles = "Waiter")]
-        [HttpPost("AddOrder")]
-        public IActionResult AddOrder([FromBody] Order order)
+        [Authorize(Roles = "Admin,Waiter")]
+        [HttpPost("CreateOrder")]
+        public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
         {
-            var result = _db.AddOrder(order);
+            var result = _db.CreateOrder(request);
             return Ok(result);
         }
-        [Authorize(Roles = "Waiter")]
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("GetOrders")]
+        public IActionResult GetOrders()
+        {
+            var result = _db.GetOrders();
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin,Waiter")]
+        [HttpGet("GetOrdersByWaiter/{waiterId}")]
+        public IActionResult GetOrdersByWaiter(int waiterId)
+        {
+            var result = _db.GetOrdersByWaiter(waiterId);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin,Chef,Waiter")]
+        [HttpGet("GetOrderItems")]
+        public IActionResult GetOrderItems()
+        {
+            var result = _db.GetOrderItems();
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin,Chef,Waiter")]
+        [HttpGet("GetOrderItemsByOrder/{orderId}")]
+        public IActionResult GetOrderItemsByOrder(int orderId)
+        {
+            var result = _db.GetOrderItemsByOrder(orderId);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin,Chef")]
+        [HttpPut("UpdateOrderStatus/{orderId}")]
+        public IActionResult UpdateOrderStatus(int orderId, [FromBody] string status)
+        {
+            var result = _db.UpdateOrderStatus(orderId, status);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin,Chef")]
+        [HttpPut("UpdateOrderItemStatus/{orderItemId}")]
+        public IActionResult UpdateOrderItemStatus(int orderItemId, [FromBody] string status)
+        {
+            var result = _db.UpdateOrderItemStatus(orderItemId, status);
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteOrder/{orderId}")]
         public IActionResult DeleteOrder(int orderId)
         {
             var result = _db.DeleteOrder(orderId);
             return Ok(result);
         }
-        [Authorize(Roles = "Waiter,Chef")]
-        [HttpPut("UpdateOrder")]
-        public IActionResult UpdateOrder([FromBody] Order order)
-        {
-            var result = _db.UpdateOrder(order);
-            return Ok(result);
-        }
-        [Authorize(Roles = "Waiter,Cashier")]
-        [HttpGet("GetOrdersByWaiter/{waiterId}")]
-        public IActionResult GetOrdersByWaiter(int waiterId)
-        {
-            var orders = _db.GetOrdersByWaiterId(waiterId);
-            return Ok(orders);
-        }
-
         //order related APIs ends
 
         //payment related APIs
-        [Authorize(Roles = "Waiter,Cashier")]
-        [HttpGet("GetPaymentsByWaiter/{waiterId}")]
-        public IActionResult GetPaymentsByWaiter(int waiterId)
+        [HttpGet("GetPayments")]
+        public IActionResult GetPayments()
         {
-            var payments = _db.GetPaymentsByWaiterId(waiterId);
-            return Ok(payments);
+            return Ok(_db.GetPayments());
         }
 
-        [Authorize(Roles = "Waiter,Cashier")]
-        [HttpGet("GetPaymentById/{waiterId}/{paymentId}")]
-        public IActionResult GetPaymentById(int waiterId, int paymentId)
+        [Authorize(Roles = "Admin,Cashier")]
+        [HttpGet("GetPaymentByOrder/{orderId}")]
+        public IActionResult GetPaymentByOrder(int orderId)
         {
-            var payment = _db.GetPaymentById(waiterId, paymentId);
-
-            if (payment == null)
-                return NotFound("Payment not found");
-
-            return Ok(payment);
+            return Ok(_db.GetPaymentByOrder(orderId));
         }
 
-        [Authorize(Roles = "Waiter,Cashier")]
+        [Authorize(Roles = "Admin,Cashier")]
         [HttpPost("AddPayment")]
         public IActionResult AddPayment([FromBody] Payment payment)
         {
-            var result = _db.AddPayment(payment);
-            return Ok(result);
+            return Ok(_db.AddPayment(payment));
         }
 
-        [Authorize(Roles = "Waiter,Cashier")]
+        [Authorize(Roles = "Admin,Cashier")]
         [HttpPut("UpdatePayment")]
         public IActionResult UpdatePayment([FromBody] Payment payment)
         {
-            var result = _db.UpdatePayment(payment);
-            return Ok(result);
+            return Ok(_db.UpdatePayment(payment));
         }
 
-        [Authorize(Roles = "Waiter,Cashier")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("DeletePayment/{paymentId}")]
         public IActionResult DeletePayment(int paymentId)
         {
-            var result = _db.DeletePayment(paymentId);
-            return Ok(result);
+            return Ok(_db.DeletePayment(paymentId));
         }
-
-
 
         //payment related APIs ends
 
         //categories API start
-        [Authorize(Roles = "Waiter,Admin")]
+        // =============================
+        // Categories APIs
+        // =============================
+
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpGet("GetCategories")]
         public IActionResult GetCategories()
         {
@@ -110,7 +139,7 @@ namespace Somethingnew.Controllers
             return Ok(categories);
         }
 
-        [Authorize(Roles = "Admin,Waiter")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("AddCategory")]
         public IActionResult AddCategory([FromBody] Category category)
         {
@@ -118,13 +147,22 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Waiter")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("UpdateCategory")]
         public IActionResult UpdateCategory([FromBody] Category category)
         {
             var result = _db.UpdateCategory(category);
             return Ok(result);
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("UpdateCategoryStatus/{categoryId}")]
+        public IActionResult UpdateCategoryStatus(int categoryId, [FromBody] bool isActive)
+        {
+            var result = _db.UpdateCategoryStatus(categoryId, isActive);
+            return Ok(result);
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("DeleteCategory/{categoryId}")]
         public IActionResult DeleteCategory(int categoryId)
