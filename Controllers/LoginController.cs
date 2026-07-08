@@ -54,6 +54,7 @@ namespace Somethingnew.Controllers
 
             return Ok(new
             {
+                userId = user.UserId,
                 token = token,
                 role = user.Role.Substring(0, 1).ToUpper() + user.Role.Substring(1).ToLower()
             });
