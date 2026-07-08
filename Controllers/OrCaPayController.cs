@@ -8,6 +8,7 @@ namespace Somethingnew.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrCaPayController : ControllerBase
     {
         //Category ,Order,Payment
