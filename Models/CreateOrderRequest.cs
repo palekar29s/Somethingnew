@@ -4,7 +4,7 @@
     {
         public int TableId { get; set; }
 
-        public int WaiterId { get; set; }
+        public int Userid { get; set; }
 
         public List<OrderItemRequest> Items { get; set; } = new();
     }
