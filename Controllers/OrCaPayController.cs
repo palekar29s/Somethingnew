@@ -30,7 +30,11 @@ namespace Somethingnew.Controllers
         public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
         {
             var result = _db.CreateOrder(request);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = "Order Created Successfully"
+            });
         }
 
         [Authorize(Roles = "Admin")]
