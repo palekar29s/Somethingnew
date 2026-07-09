@@ -416,7 +416,7 @@ namespace Somethingnew.Databases
             INSERT INTO Orders
             (TableId, WaiterId, OrderStatus, TotalAmount)
             VALUES
-            (@TableId, @WaiterId, 'Pending', 0)
+            (@TableId, @UserId, 'Pending', 0)
             RETURNING OrderId";
 
                 int orderId;
@@ -424,7 +424,7 @@ namespace Somethingnew.Databases
                 using (var cmd = new NpgsqlCommand(orderQuery, conn, transaction))
                 {
                     cmd.Parameters.AddWithValue("@TableId", request.TableId);
-                    cmd.Parameters.AddWithValue("@WaiterId", request.WaiterId);
+                    cmd.Parameters.AddWithValue("@UserId", request.UserId);
 
                     orderId = Convert.ToInt32(cmd.ExecuteScalar());
                 }
