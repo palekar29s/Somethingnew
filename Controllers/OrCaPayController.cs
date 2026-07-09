@@ -25,14 +25,18 @@ namespace Somethingnew.Controllers
         // Orders APIs
         // ============================
 
+        
         [Authorize(Roles = "Admin,Waiter")]
         [HttpPost("CreateOrder")]
         public IActionResult CreateOrder([FromBody] CreateOrderRequest request)
         {
             var result = _db.CreateOrder(request);
+
             return Ok(new
             {
                 success = true,
+                orderId = result.OrderId,
+                totalAmount = result.TotalAmount,
                 message = "Order Created Successfully"
             });
         }

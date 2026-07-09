@@ -400,7 +400,7 @@ namespace Somethingnew.Databases
 
         //order related query starts here
 
-        public string CreateOrder(CreateOrderRequest request)
+        public CreateOrderResponse CreateOrder(CreateOrderRequest request)
         {
             using var conn = GetConnection();
             conn.Open();
@@ -496,12 +496,16 @@ namespace Somethingnew.Databases
 
                 transaction.Commit();
 
-                return "Order Created Successfully";
+                return new CreateOrderResponse
+                {
+                    OrderId = orderId,
+                    TotalAmount = totalAmount
+                };
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                return ex.Message;
+                throw new Exception(ex.Message);
             }
         }
 
