@@ -112,14 +112,14 @@ namespace Somethingnew.Controllers
             return Ok(_db.GetPaymentByOrder(orderId));
         }
 
-        [Authorize(Roles = "Admin,Cashier")]
+        [Authorize(Roles = "Admin,Cashier,Waiter")]
         [HttpPost("AddPayment")]
         public IActionResult AddPayment([FromBody] Payment payment)
         {
             return Ok(_db.AddPayment(payment));
         }
 
-        [Authorize(Roles = "Admin,Cashier")]
+        [Authorize(Roles = "Admin,Cashier,Waiter")]
         [HttpPut("UpdatePayment")]
         public IActionResult UpdatePayment([FromBody] Payment payment)
         {
