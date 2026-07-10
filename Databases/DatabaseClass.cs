@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Somethingnew.Models;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -932,7 +933,37 @@ namespace Somethingnew.Databases
 
             return "Payment Deleted Successfully";
         }
+        public DataTable GetPaymentsByUser(int userId)
+        {
+            using var conn = GetConnection();
+            conn.Open();
 
+            string query = @"
+        SELECT
+            p.paymentid,
+            p.orderid,
+            p.amount,
+            p.paymentmethod,
+            p.status,
+            p.paymentdate
+        FROM Payments p
+        INNER JOIN Orders o
+            ON p.orderid = o.orderid
+        WHERE o.userid = @UserId
+        ORDER BY p.paymentid DESC";
+
+            using var cmd = new NpgsqlCommand(query, conn);
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            using var da = new NpgsqlDataAdapter(cmd);
+
+            DataTable dt = new DataTable();
+
+            da.Fill(dt);
+
+            return dt;
+        }
         //payment related query ends here
     }
 }

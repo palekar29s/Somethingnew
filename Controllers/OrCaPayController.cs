@@ -105,7 +105,7 @@ namespace Somethingnew.Controllers
             return Ok(_db.GetPayments());
         }
 
-        [Authorize(Roles = "Admin,Cashier")]
+        [Authorize(Roles = "Admin,Cashier,Waiter")]
         [HttpGet("GetPaymentByOrder/{orderId}")]
         public IActionResult GetPaymentByOrder(int orderId)
         {
@@ -139,6 +139,19 @@ namespace Somethingnew.Controllers
             return Ok(_db.DeletePayment(paymentId));
         }
 
+
+        [HttpGet("GetPaymentsByUser/{userId}")]
+        public IActionResult GetPaymentsByUser(int userId)
+        {
+            try
+            {
+                return Ok(_db.GetPaymentsByUser(userId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         //payment related APIs ends
 
         //categories API start
