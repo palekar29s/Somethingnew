@@ -149,7 +149,7 @@ namespace Somethingnew.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, ex.ToString());
             }
         }
         //payment related APIs ends

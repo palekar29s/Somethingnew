@@ -933,7 +933,7 @@ namespace Somethingnew.Databases
 
             return "Payment Deleted Successfully";
         }
-        public DataTable GetPaymentsByUser(int userId)
+        public List<object> GetPaymentsByUser(int userId)
         {
             using var conn = GetConnection();
             conn.Open();
@@ -950,19 +950,28 @@ FROM Payments p
 INNER JOIN Orders o
     ON p.orderid = o.orderid
 WHERE o.waiterid = @WaiterId
-ORDER BY p.paymentid DESC"; ;
+ORDER BY p.paymentid DESC";
 
             using var cmd = new NpgsqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@WaiterId", userId);
 
-            cmd.Parameters.AddWithValue("@UserId", userId);
+            using var reader = cmd.ExecuteReader();
 
-            using var da = new NpgsqlDataAdapter(cmd);
+            var list = new List<object>();
 
-            DataTable dt = new DataTable();
+            while (reader.Read())
+            {
+                list.Add(new
+                {
+                    PaymentId = reader["paymentid"],
+                    OrderId = reader["orderid"],
+                    Amount = reader["amount"],
+                    PaymentMethod = reader["paymentmethod"],
+                    Status = reader["paymentstatus"]
+                });
+            }
 
-            da.Fill(dt);
-
-            return dt;
+            return list;
         }
         //payment related query ends here
     }
