@@ -138,7 +138,7 @@ namespace Somethingnew.Controllers
             });
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpDelete("DeletePayment/{paymentId}")]
         public IActionResult DeletePayment(int paymentId)
         {
