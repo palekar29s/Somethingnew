@@ -939,18 +939,18 @@ namespace Somethingnew.Databases
             conn.Open();
 
             string query = @"
-        SELECT
-            p.paymentid,
-            p.orderid,
-            p.amount,
-            p.paymentmethod,
-            p.status,
-            p.paymentdate
-        FROM Payments p
-        INNER JOIN Orders o
-            ON p.orderid = o.orderid
-        WHERE o.userid = @UserId
-        ORDER BY p.paymentid DESC";
+SELECT
+    p.paymentid,
+    p.orderid,
+    p.amount,
+    p.paymentmethod,
+    p.paymentstatus,
+    p.paidat
+FROM Payments p
+INNER JOIN Orders o
+    ON p.orderid = o.orderid
+WHERE o.waiterid = @WaiterId
+ORDER BY p.paymentid DESC"; ;
 
             using var cmd = new NpgsqlCommand(query, conn);
 
