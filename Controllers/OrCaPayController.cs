@@ -129,7 +129,13 @@ namespace Somethingnew.Controllers
         [HttpPut("UpdatePayment")]
         public IActionResult UpdatePayment([FromBody] Payment payment)
         {
-            return Ok(_db.UpdatePayment(payment));
+            string message = _db.UpdatePayment(payment);
+
+            return Ok(new
+            {
+                success = true,
+                message = message
+            });
         }
 
         [Authorize(Roles = "Admin")]
