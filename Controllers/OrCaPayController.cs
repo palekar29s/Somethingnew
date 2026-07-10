@@ -116,7 +116,13 @@ namespace Somethingnew.Controllers
         [HttpPost("AddPayment")]
         public IActionResult AddPayment([FromBody] Payment payment)
         {
-            return Ok(_db.AddPayment(payment));
+            var result = _db.AddPayment(payment);
+
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
         [Authorize(Roles = "Admin,Cashier,Waiter")]
