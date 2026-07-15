@@ -73,7 +73,7 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Chef")]
+        [Authorize(Roles = "Admin,Chef,Waiter")]
         [HttpPut("UpdateOrderStatus/{orderId}")]
         public IActionResult UpdateOrderStatus(int orderId, [FromBody] string status)
         {
@@ -81,7 +81,7 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,Chef")]
+        [Authorize(Roles = "Admin,Chef,Waiter")]
         [HttpPut("UpdateOrderItemStatus/{orderItemId}")]
         public IActionResult UpdateOrderItemStatus(int orderItemId, [FromBody] string status)
         {
@@ -89,7 +89,7 @@ namespace Somethingnew.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Waiter")]
         [HttpDelete("DeleteOrder/{orderId}")]
         public IActionResult DeleteOrder(int orderId)
         {
