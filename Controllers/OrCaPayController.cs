@@ -94,7 +94,10 @@ namespace Somethingnew.Controllers
         public IActionResult DeleteOrder(int orderId)
         {
             var result = _db.DeleteOrder(orderId);
-            return Ok(result);
+            return Ok(new
+            {
+                message = "Order Deleted Successfully"
+            });
         }
         //order related APIs ends
 
@@ -178,7 +181,11 @@ namespace Somethingnew.Controllers
         public IActionResult AddCategory([FromBody] Category category)
         {
             var result = _db.AddCategory(category);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -186,7 +193,11 @@ namespace Somethingnew.Controllers
         public IActionResult UpdateCategory([FromBody] Category category)
         {
             var result = _db.UpdateCategory(category);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -194,7 +205,11 @@ namespace Somethingnew.Controllers
         public IActionResult UpdateCategoryStatus(int categoryId, [FromBody] bool isActive)
         {
             var result = _db.UpdateCategoryStatus(categoryId, isActive);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -202,7 +217,11 @@ namespace Somethingnew.Controllers
         public IActionResult DeleteCategory(int categoryId)
         {
             var result = _db.DeleteCategory(categoryId);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
 

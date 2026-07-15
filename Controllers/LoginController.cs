@@ -83,7 +83,11 @@ namespace Somethingnew.Controllers
         public IActionResult DeleteUser(int userId)
         {
             var result = _db.DeleteUser(userId);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
     }
 }

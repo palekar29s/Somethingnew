@@ -44,7 +44,11 @@ namespace Somethingnew.Controllers
         public IActionResult UpdateRestaurantTable([FromBody] RestaurantTable table)
         {
             var result = _db.UpdateRestaurantTable(table);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -52,7 +56,11 @@ namespace Somethingnew.Controllers
         public IActionResult UpdateTableStatus(int tableId, [FromBody] string status)
         {
             var result = _db.UpdateTableStatus(tableId, status);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -60,7 +68,11 @@ namespace Somethingnew.Controllers
         public IActionResult DeleteRestaurantTable(int tableId)
         {
             var result = _db.DeleteRestaurantTable(tableId);
-            return Ok(result);
+            return Ok(new
+            {
+                success = true,
+                message = result
+            });
         }
         //Api related to restaurant tables ends
 
